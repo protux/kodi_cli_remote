@@ -1,6 +1,7 @@
 package main
 
 import (
+    "errors"
     "fmt"
     "os"
     "strings"
@@ -24,8 +25,8 @@ func checkAndHandleArgumentsConfig(configuration *administration.Configuration, 
     return changed
 }
 
-func splitParameterIntoMap(args []string) map[string]string {
-    params := map[string]string{}
+func splitParameterIntoMap(args []string) map[string]interface{} {
+    params := map[string]interface{}{}
     
     if len(args) > 1 {
         paramPairs := strings.Split(args[1], ",")
@@ -53,9 +54,9 @@ func checkAndPrintHelp(args []string) bool {
                 if success {
                     fmt.Println(`Help for command`, command.CliName)
                     fmt.Println(`Description:`, command.Description)
-                    if len(command.Parameters) > 0 {
+                    if len(command.ParametersDescription) > 0 {
                         fmt.Println(`Parameters`)
-                        for param, desc := range command.Parameters {
+                        for param, desc := range command.ParametersDescription {
                             fmt.Println(param, `-`, desc)
                         }
                     }
@@ -89,13 +90,19 @@ func main() {
     } else if !checkAndPrintHelp(os.Args) {
         args := os.Args[1:]
         config, err := administration.CreateConfiguration()
+        
+        
         if err == nil {
             if checkAndHandleArgumentsConfig(&config, args) {
                 if err := administration.WriteConfiguration(config); err != nil {
                     fmt.Println(err.Error())
                 }
             } else {
-                err := kodicommunicator.ExecuteCommand(config, args[1], splitParameterIntoMap(args))
+                if len(config.Host) == 0 {
+                    err = errors.New(`No host configured. Please see "help" to learn about how to configure the remote.`)
+                }
+        
+                err := kodicommunicator.ExecuteCommand(config, args[0], args[1:])
                 if err != nil {   
                     fmt.Println(err.Error())
                 }
