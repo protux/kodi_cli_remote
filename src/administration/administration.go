@@ -68,6 +68,7 @@ func CreateConfiguration() (Configuration, error) {
     if configuration, err := loadConfiguration(); err != nil {
         if home, err := homedir.Dir(); err == nil {
             var initialConfig Configuration
+            initialConfig.Port = `80`
             os.MkdirAll(home + `/` + fileDirectory, os.ModeDir | 0700)
             err = WriteConfiguration(initialConfig)
             return initialConfig, err

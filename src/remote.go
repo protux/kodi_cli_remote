@@ -100,9 +100,9 @@ func main() {
             } else {
                 if len(config.Host) == 0 {
                     err = errors.New(`No host configured. Please see "help" to learn about how to configure the remote.`)
+                } else {
+                    err = kodicommunicator.ExecuteCommand(config, args[0], args[1:])
                 }
-        
-                err := kodicommunicator.ExecuteCommand(config, args[0], args[1:])
                 if err != nil {   
                     fmt.Println(err.Error())
                 }
